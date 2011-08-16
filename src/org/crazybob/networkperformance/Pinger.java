@@ -30,6 +30,7 @@ public class Pinger extends Service implements Runnable {
       wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Pinger");
       wakeLock.acquire();
       thread.start();
+      PingLog.logStarted();
     }
     return START_STICKY;
   }
@@ -44,7 +45,7 @@ public class Pinger extends Service implements Runnable {
         socket.close();
       } catch (IOException e) {}
     }
-    PingLog.flush();
+    PingLog.stop();
     wakeLock.release();
     super.onDestroy();
   }
@@ -69,6 +70,8 @@ public class Pinger extends Service implements Runnable {
         socket.connect(new InetSocketAddress("74.122.184.244", 80), TIMEOUT);
         PingLog.logConnected(System.currentTimeMillis() - start);
       } catch (IOException e) {
+        socket = null;
+        Log.w("Pinger", "Error connectng.", e);
         PingLog.logConnectionError(System.currentTimeMillis() - start);
         return;
       }
@@ -83,7 +86,10 @@ public class Pinger extends Service implements Runnable {
         socket.close();
       } catch (IOException e1) {}
       socket = null;
-      if (running.get()) PingLog.logIoError(System.currentTimeMillis() - start);
+      if (running.get()) {
+        Log.w("Pinger", "Error pinging.", e);
+        PingLog.logIoError(System.currentTimeMillis() - start);
+      }
     }
   }
 }

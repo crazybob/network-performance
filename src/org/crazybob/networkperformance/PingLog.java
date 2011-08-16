@@ -9,6 +9,10 @@ import java.io.Writer;
 /** @author Bob Lee (bob@squareup.com) */
 public class PingLog {
 
+  static void logStarted() {
+    log("STARTED");
+  }
+
   static void logConnected(long elapsed) {
     log("CONNECTED " + elapsed);
   }
@@ -25,11 +29,16 @@ public class PingLog {
     log("IO_ERROR " + elapsed);
   }
 
-  static synchronized void flush() {
-    if (out != null) try {
-      out.flush();
-    } catch (IOException e) {
-      Log.w("PingLog", "Failed to flush log: " + e);
+  static synchronized void stop() {
+    if (out != null) {
+      try {
+        log("STOPPED");
+        out.flush();
+        out.close();
+        out = null;
+      } catch (IOException e) {
+        Log.w("PingLog", "Failed to flush log: " + e);
+      }
     }
   }
 
