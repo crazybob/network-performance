@@ -3,6 +3,7 @@ package org.crazybob.networkperformance;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,19 +54,19 @@ public class Parse {
       }
     }
 
-    System.out.println("Max\t" + max);
-    System.out.println("Min\t" + min);
+//    System.out.println("Max\t" + max);
+//    System.out.println("Min\t" + min);
 
-    int[] buckets = new int[16];
+    FileWriter out = new FileWriter("/Users/crazybob/ping.xy");
+
+    long base = 1313467854474L;
+
     for (Record record : records) {
       if (record.type == Type.RESPONSE_TIME) {
-        int bucket = (int) record.elapsed / 500;
-        buckets[bucket]++;
+        out.write((record.timestamp - base) + "\t" + record.elapsed + "\n");
       }
     }
 
-    for (int i = 0; i < buckets.length; i++) {
-      System.out.println(i * 500 + "-" + (((i + 1) * 500) - 1) + "\t" + buckets[i]);
-    }
+    out.close();
   }
 }
